@@ -1,5 +1,8 @@
 // PODO = Plain Old Dart Object
+enum NetworkStatus {Loading, Success, Failed}
+
 class Network {
+  NetworkStatus status;
   bool success = false;
   String message = "";
   dynamic data;
