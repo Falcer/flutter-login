@@ -61,7 +61,6 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               GestureDetector(
                 onTap: () async {
-                  // TODO: Login Here
                   setState(() {
                     _isLoading = true;
                   });
