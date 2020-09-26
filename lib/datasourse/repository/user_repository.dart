@@ -13,7 +13,6 @@ class UserRepository {
 
   UserRepository._internal();
 
-
   Future<Network> login(String username, String password) async {
     return _userNetwork.login(username, password);
   }
@@ -21,7 +20,3 @@ class UserRepository {
     return _userNetwork.register(user);
   }
 }
-
-// UserRepository()
-
-// new UserRepository()

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:login/provider/user_provider.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 // Username
 // Password
@@ -13,6 +16,8 @@ class _LoginScreenState extends State<LoginScreen> {
       TextEditingController(); // Get Value of Username TextField
   final passwordController =
       TextEditingController(); // Get Value of Password TextField
+  bool _isLoading = false;
+
 
   @override
   void dispose() {
@@ -23,6 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -54,7 +60,50 @@ class _LoginScreenState extends State<LoginScreen> {
                 height: 16,
               ),
               GestureDetector(
-                onTap: () {},
+                onTap: () async {
+                  // TODO: Login Here
+                  setState(() {
+                    _isLoading = true;
+                  });
+                  userProvider
+                      .login(usernameController.text, passwordController.text)
+                      .then((value) async => {
+                            if (value.success)
+                              {
+                                SharedPreferences.getInstance().then((prefs) => {
+                                  prefs.setString(
+                                    'token', value.data.toString())
+                                }),
+                                Navigator.pushReplacementNamed(
+                                    context, "/home"),
+                              }
+                            else
+                              {
+                                showDialog(
+                                  context: context,
+                                  builder: (BuildContext ctx) {
+                                    return AlertDialog(
+                                      title: Text("Login Failed"),
+                                      content: Text(value.message),
+                                      actions: [
+                                        FlatButton(
+                                          onPressed: () {
+                                            Navigator.pop(ctx);
+                                          },
+                                          child: Text("Ok"),
+                                        )
+                                      ],
+                                    );
+                                  },
+                                )
+                              }
+                          })
+                      .whenComplete(() => {
+                            this.setState(() {
+                              this._isLoading = !this._isLoading;
+                            })
+                          });
+                },
                 child: Container(
                   padding: EdgeInsets.symmetric(
                     vertical: 16,
@@ -65,12 +114,20 @@ class _LoginScreenState extends State<LoginScreen> {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Center(
-                    child: Text(
-                      "Login",
-                      style: TextStyle(
-                        color: Colors.white,
-                      ),
-                    ),
+                    child: !this._isLoading
+                        ? Text(
+                            "Login",
+                            style: TextStyle(
+                              color: Colors.white,
+                            ),
+                          )
+                        : Container(
+                            width: 16,
+                            height: 16,
+                            child: CircularProgressIndicator(
+                              valueColor:
+                                  AlwaysStoppedAnimation<Color>(Colors.white),
+                            )),
                   ),
                 ),
               ),
